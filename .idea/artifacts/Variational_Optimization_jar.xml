@@ -1,0 +1,9 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="Variational-Optimization:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/Variational_Optimization_jar</output-path>
+    <root id="archive" name="Variational-Optimization.jar">
+      <element id="module-output" name="Variational-Optimization" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/mariuszgromada/math/MathParser.org-mXparser/4.2.0/MathParser.org-mXparser-4.2.0.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>
