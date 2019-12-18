@@ -7,10 +7,8 @@ import org.mariuszgromada.math.mxparser.Function;
 import javax.swing.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.DoubleBinaryOperator;
 
 public class MainWindow {
     private JPanel rootPanel;
@@ -27,7 +25,9 @@ public class MainWindow {
     private JTextField maxTField;
     private JTextField minXField;
     private JTextField maxXField;
+    private JTextField stepsField;
     
+    public static final String TITLE = "Variational optimization";
     private Function function;
     
     private MainWindow() {
@@ -48,6 +48,8 @@ public class MainWindow {
             double uX = Double.parseDouble(upperX.getText());
             double lY = Double.parseDouble(lowerY.getText());
             double uY = Double.parseDouble(upperY.getText());
+            
+            int steps = Integer.parseInt(stepsField.getText());
             
             function = new Function(functionField.getText());
             
@@ -77,12 +79,12 @@ public class MainWindow {
                     break;
                     
                 default:
-                    variationalSolver = new DirectSolver();
+                    variationalSolver = new DirectSolver(steps);
                     results = variationalSolver.solve(f, new PointDouble(lX, lY), new PointDouble(uX, uY));
                     best = results.get(results.size() - 1);
-                    dt = (uX - lX) / (double)(DirectSolver.STEPS + 1.0);
+                    dt = (uX - lX) / (double)(steps + 1.0);
                     log.append("\nGenerated");
-                    for (int i = 0; i <= DirectSolver.STEPS + 1; i++) {
+                    for (int i = 0; i <= steps + 1; i++) {
                         double x = best.lower() + i * dt;
                         log.append("\n" + i + ": " + new PointDouble(x, best.evaluate(x)).toString(3));
                     }
@@ -116,7 +118,7 @@ public class MainWindow {
     
     
     public static void main(String[] args) {
-        JFrame frame = new JFrame("Integral");
+        JFrame frame = new JFrame(TITLE);
         MainWindow gui = new MainWindow();
         frame.setContentPane(gui.rootPanel);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

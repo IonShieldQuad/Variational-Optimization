@@ -6,7 +6,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class ChainGradientSolver extends SolverND {
-    private int I_MAX = 0x00000fff;
+    private int I_MAX = 64;
     private double DESC_RATE = 1;
     
     @Override

@@ -7,18 +7,22 @@ import java.util.List;
 import java.util.function.Function;
 
 public class DirectSolver implements VariationalSolver {
-    public static final int STEPS = 100;
+    private int steps = 20;
+    
+    public DirectSolver(int steps) {
+        this.steps = steps;
+    }
     
     @Override
     public List<Interpolator> solve(Function<List<Double>, Double> function, PointDouble start, PointDouble end) {
-        SolverND solver = new ChainGradientSolver();
+        SolverND solver = new GaussSeidelSolver();
         List<Double> in = new ArrayList<>();
-        double delta = (end.getX() - start.getX()) / (STEPS + 1.0);
-        for (int i = 0; i < STEPS; i++) {
-            double alpha = i / (STEPS + 2.0);
+        double delta = (end.getX() - start.getX()) / (steps + 1.0);
+        for (int i = 0; i < steps; i++) {
+            double alpha = i / (steps + 2.0);
             //in.add(start.getY() * (1 - alpha) + end.getY() * alpha);
-            in.add(1.0);
-            //in.add(Math.random());
+            //in.add(1.0);
+            in.add(Math.random());
         }
         solver.setF(l -> functionalValue(function, l, start, end));
         List<Double> result = solver.solve(in);
@@ -35,40 +39,58 @@ public class DirectSolver implements VariationalSolver {
     private double functionalValue(Function<List<Double>, Double> function, List<Double> values, PointDouble start, PointDouble end) {
         double res = 0;
         
-        double delta = (end.getX() - start.getX()) / (STEPS + 1.0);
+        double delta = (end.getX() - start.getX()) / (steps + 1.0);
     
-        double currT;
-        double prevT = start.getX();
-        double currX;
-        double prevX = start.getY();
-        double currZ;
+        double nextT;
+        double currT = start.getX();
+        double nextX;
+        double currX = start.getY();
+        double currZ = 0;
         double prevZ = 0;
-        double prevPrevF = 0;
-        double prevF;
+        double currF = 0;
+        double prevF = 0;
         
-        for (int i = 0; i <= STEPS; i++) {
-            if (i == STEPS) {
-                currX = end.getY();
+        for (int i = 0; i <= steps + 1; i++) {
+            if (i == 0) {
+                currX = start.getY();
             }
             else {
-                currX = values.get(i);
+                if (i == steps + 1) {
+                    currX = end.getY();
+                } else {
+                    currX = values.get(i - 1);
+                }
             }
-            currT = start.getX() + (i + 1) * delta;
-            currZ = (currX - prevX) / delta;
-            prevF = function.apply(Arrays.asList(prevT, prevX, currZ));
-            if (i != 0) {
-                double area = ((prevPrevF + prevF) / 2.0) * delta;
-                res += area;
+            if (i == steps + 1 || i == steps) {
+                nextX = end.getY();
+            }
+            else {
+                nextX = values.get(i);
+            }
+            currT = start.getX() + i * delta;
+            nextT = currT + delta;
+            
+            if (i != steps + 1) {
+                currZ = (nextX - currX) / delta;
             }
             
-            prevT = currT;
-            prevX = currX;
-            prevZ = currZ;
-            prevPrevF = prevF;
+            if (i != steps + 1) {
+                currF = function.apply(Arrays.asList(currT, currX, currZ));
+            }
+            else {
+                currF = 0;
+            }
+            
+            if (i != 0) {
+                double area = ((currF + prevF) / 2.0) * delta;
+                
+                res += area;
+            }
+            prevF = currF;
         }
-        prevF = function.apply(Arrays.asList(prevT, prevX, prevZ));
+        /*prevF = function.apply(Arrays.asList(prevT, prevX, prevZ));
         double area = ((prevPrevF + prevF) / 2.0) * delta;
-        res += area;
+        res += area;*/
         
         return res;
     }

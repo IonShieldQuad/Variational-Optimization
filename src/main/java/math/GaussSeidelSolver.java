@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class GaussSeidelSolver extends SolverND {
-    private static final int I_MAX = 1024;
+    private static final int I_MAX = 256;
     
     @Override
     protected List<Double> solveInternal(List<Double> data) {
